@@ -1,7 +1,9 @@
 # Walk-Potential
-A tool used to identify corridors in US cities with high walking potential, measuring both topography and seperation from car traffic.
+A tool used to identify corridors in US cities with high walking potential, measuring both topography and seperation from car traffic to run pathfinding simulations to determine ideal corridors for multimodal infrastructure.
 
 This project uses data from OpenStreetMap, the Bureau of Transportation Statistics, and the United States Geological Survey to give a "walking potential score" to every street in a given geographic location.
+
+Outputs and visualizations can be found [here.](https://storymaps.arcgis.com/stories/2b8c0e71b4f74a76ab963563903b0fc8)
 
 # What is Walking Potential? #
 This project came about when I wanted to find out the best places for my college town to invest in walking and biking infrastructure. 
@@ -29,4 +31,4 @@ Once downloaded, you will need to modify the .R file to point towards the state'
 
 You will also need to modify the bbox to whichever city you want to collect data from. The file default is for "Pullman, Washington, USA".
 
-Once running, the script takes anywhere from 10-30 minutes to complete, depending on how large of a geographic area you requested.
+As this is a a Monte-Carlo simulation that requires inspecting every road in a city beforehand, this tool is **slow**. Expect an hour for a small city and several hours for a large one.
