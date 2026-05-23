@@ -3,7 +3,7 @@
 ### Noise pollution accounts for other factors such as traffic volumes and speed
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-# for our bounding box, get a road's points and obtain its nodes
+
 library(raster)
 library(sf)
 library(sp)
@@ -18,11 +18,11 @@ library(ggspatial)
 library(rosm)
 library(prettymapr)
 
-# replace with a path to your own state's .tif file
+# *replace with a path to your own state's .tif file*
 # WA State - if we are examining any other state, this needs to be changed
 noise_data <- raster("C:\\Users\\gilre\\Documents\\CptS 475\\Walk Potential\\final_project\\CONUS_road_noise_2020\\State_rasters\\WA_road_noise_2020.tif")
 
-bbox <- getbb("Pullman, Washington, USA")
+bbox <- getbb("Issaquah, Washington, USA")
 roads <- opq(bbox = bbox) %>% add_osm_feature(key = "highway") %>% osmdata_sf()
 #nodes <- roads$osm_points
 ways <- roads$osm_lines
@@ -96,12 +96,6 @@ for (i in 1:nrow(ways))
   
   
   # obtain the average transportation noise pollution along the road
-  #start_point <- spTransform(SpatialPoints(cbind(line$geometry[[1]][1], line$geometry[[1]][2]), proj4string = CRS("+proj=longlat +datum=NAD83")), crs(noise_data))
-  #end_point <- spTransform(SpatialPoints(cbind(line$geometry[[2]][1], line$geometry[[2]][2]), proj4string = CRS("+proj=longlat +datum=NAD83")), crs(noise_data))
-  
-  #start_noise_value = extract(noise_data, start_point)
-  #end_noise_value = extract(noise_data, end_point)
-  
   total_noise_value = 0
   for (j in 1:nrow(ways[i,]$geometry[[1]]))
   {
@@ -118,23 +112,6 @@ for (i in 1:nrow(ways))
   }
   average_noise_value = total_noise_value / nrow(ways[i,]$geometry[[1]])
   
-  #if (is.na(average_noise_value))
-  #{
-  #  start_noise_value <- 40
-  #}
-  
-  # default value if quieter than 45db
-  #if (is.na(start_noise_value))
-  #{
-  #  start_noise_value <- 40
-  #}
-  
-  #if (is.na(end_noise_value))
-  #{
-  #  end_noise_value <- 40
-  #}
-  
-  #ways[i,]$noise = mean(start_noise_value, end_noise_value)
   ways[i,]$noise = average_noise_value
   
   
@@ -178,14 +155,19 @@ ggplot(data = ways) +
 library(igraph)
 library(leaflet)
 
-ways <- readRDS("C:\\Users\\gilre\\Documents\\CptS 475\\Walk Potential\\pullman.rds")
+# import a previous run if necessary
+#ways <- readRDS("pullman.rds")
 
 ways <- ways %>%
-  filter(!name %in% c("Northeast Airport Drive", "Kitzmiller Road", "Old Moscow Road", "Southeast Johnson Road", "Brayton Road",
-                      "Orville Boyd Road", "Pullman-Albion Road", "Northwest Albion Drive", "Northwest Cottonwood Drive",
-                      "Whelan Road", "Wexler Road", "Osprey Lane", "Eagle Lane", "Warren Road", "Kestrel Lane", "J Bar S Road",
-                      "Chukkar Road", "Pullman Airport Road", "State Route 270", "Bill Chipman Palouse Trail", "Johnson Road", 
-                      "Country Club Road", "State Route 195", "Armstrong Road", "Sunshine Road", "Northeast Airport Drive"))
+  filter(!highway %in% c("motorway", "motorway_link"))
+
+# remove any other undesired roads from your pathfinding
+# ways <- ways %>%
+#   filter(!name %in% c("Northeast Airport Drive", "Kitzmiller Road", "Old Moscow Road", "Southeast Johnson Road", "Brayton Road",
+#                       "Orville Boyd Road", "Pullman-Albion Road", "Northwest Albion Drive", "Northwest Cottonwood Drive",
+#                       "Whelan Road", "Wexler Road", "Osprey Lane", "Eagle Lane", "Warren Road", "Kestrel Lane", "J Bar S Road",
+#                       "Chukkar Road", "Pullman Airport Road", "State Route 270", "Bill Chipman Palouse Trail", "Johnson Road", 
+#                       "Country Club Road", "State Route 195", "Armstrong Road", "Sunshine Road", "Northeast Airport Drive"))
 
 # extract list-column of coordinates for each feature
 coords_list <- st_geometry(ways)
@@ -273,11 +255,6 @@ for (i in 1:1000) {
 
 ways$times_used_log <- apply(X = ways, MARGIN = 1, FUN = function(ways) {if (ways$times_used != 0) { return(log(ways$times_used)) } else return(0)})
 
-
-
-# fairly certain this breaks ways
-# ways <- ways %>%
-#   filter(!highway %in% "trunk")
   
 # Create color palette from grey to red based on times_used
 pal <- colorNumeric(
@@ -323,4 +300,4 @@ leaflet(data = ways) %>%
     opacity = 1
   )
 
-saveRDS(object = ways, file = "pullman_walkcorridor_final.rds")
+saveRDS(object = ways, file = "walkcorridor.rds")
